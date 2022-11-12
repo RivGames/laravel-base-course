@@ -10,51 +10,55 @@ class PostController extends Controller
     public function index()
     {
 //        $posts = Post::where('likes','>',10)->get();
-        $posts = DB::table('posts')->select('title')->where('deleted_at','=',null)->get();
-        foreach ($posts as $post) {
-            dump($post);
-        }
-        return view('index',$posts);
+//        $posts = DB::table('posts')->select('title')->where('deleted_at','=',null)->get();
+        $posts = Post::all();
+        return view('post.index', compact('posts'));
     }
 
     public function create()
     {
-        $postsArr = [
-            [
-                'title' => 'title2',
-                'content' => 'lorem ipsum',
-                'image' => 'image1.img',
-                'likes' => 30,
-                'is_published' => 1,
-            ],
-            [
-                'title' => 'title3',
-                'content' => 'lorem ipsum',
-                'image' => 'image2.img',
-                'likes' => 300,
-                'is_published' => 0,
-            ]
-        ];
-        foreach ($postsArr as $post) {
-            Post::create($post);
-        }
+        return view('post.create');
     }
 
-    public function update()
+    public function store()
     {
-        $post = Post::find(1);
-        $post->update([
-            'title' => 'updated',
-            'content' => 'updated',
-            'image' => 'updated',
-            'likes' => 0,
-            'is_published' => 0
+        $data = request()->validate([
+            'title' => 'string',
+            'content' => 'string',
+            'image' => 'string'
         ]);
+        Post::create($data);
+        return redirect()->route('post.index');
     }
 
-    public function delete()
+    public function show($id)
     {
-        $post = Post::find(2);
+        $post = Post::find($id);
+        return view('post.show', compact('post'));
+    }
+
+    public function edit($id)
+    {
+        $post = Post::find($id);
+        return view('post.edit', compact('post'));
+    }
+
+    public function update($id)
+    {
+        $data = request()->validate([
+            'title' => 'string',
+            'content' => 'string',
+            'image' => 'integer',
+        ]);
+        $post = Post::find($id);
+        $post->update($data);
+        return redirect()->route('post.index');
+    }
+
+    public function delete($id)
+    {
+        $post = Post::find($id);
         $post->delete();
+        return redirect()->route('post.index');
     }
 }
